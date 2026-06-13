@@ -10,42 +10,77 @@ class chatbot:
         self.memory = []
         self.client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-    def memory_classifier(prompt):
-        memory_classification = client.models.generate_content(
-            model = "gemini-2.5-flash-lite",
+    def memory_classifier(self,prompt):
+        memory_classification = self.client.models.generate_content(
+            model = "gemini-3.1-flash-lite",
             config = {
-                "response_mime_type":"applications/json"
+                "response_mime_type":"application/json"
             },
             contents =f"""
-            You are a memory classifier which decides whether to keep the info in the knowledge base or not based on your knowledge 
+            You are a memory classifier for an AI assistant.
 
-            use json and json Only to store the necessary information
+Your task is to determine whether the user's message contains information that should be stored in a long-term knowledge base.
 
-            example:
-            
-                {{
-    "personal": [
-        "Name is Sakshyam",
-        "19 years old"
-    ],
+Store information only if it is likely to be useful in future conversations.
 
-    "education": [
-        "Studies Computer Engineering",
-        "Learning Numerical Methods"
-    ],
+Examples of information to store:
+- Name
+- Age
+- Occupation
+- Education
+- Skills
+- Preferences
+- Favorite things
+- Ongoing projects
+- Goals
+- Software or tools regularly used
+- Long-term interests
 
-    "technology": [
-        "Uses Arch Linux",
-        "Favorite language is Python"
-    ],
+Do NOT store:
+- Greetings
+- Small talk
+- One-time requests
+- Questions
+- Temporary statements
+- Generic conversation
 
-    "projects": [
-        "Building a knowledge base chatbot"
-    ]
+Return ONLY valid JSON.
+
+If the message contains useful information:
+
+{{
+  "store": true,
+  "category": "<category>",
+  "memory": "<memory_to_store>"
 }}
+
+Valid categories:
+- personal
+- education
+- technology
+- projects
+- preferences
+- skills
+- goals
+- other
+
+If the message should not be stored:
+
+{{
+  "store": false
+}}
+
+User Message:
+{prompt}
  """
         
         )
         memory_data = memory_classification.text.strip()
         with open("knowledgebase.txt","a") as file:
             file.write(str(memory_data))
+
+bot = chatbot()
+
+prompt = ["hi my name is sakshyam"]
+
+bot.memory_classifier(prompt)
