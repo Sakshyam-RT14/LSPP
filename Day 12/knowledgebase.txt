@@ -1,0 +1,9 @@
+{
+  "store": true,
+  "category": "personal",
+  "memory": "User's name is Sakshyam."
+}{
+  "store": true,
+  "category": "goals",
+  "memory": "The user is interested in fitness and likes chicken momos."
+}
