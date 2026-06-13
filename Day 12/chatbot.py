@@ -1,8 +1,11 @@
 from dotenv import load_dotenv
 import os 
 from google import genai
+import json
+
 
 load_dotenv()
+MAX_HISTORY = 4
 
 class chatbot:
     def __init__(self):
@@ -77,10 +80,76 @@ User Message:
         )
         memory_data = memory_classification.text.strip()
         with open("knowledgebase.txt","a") as file:
-            file.write(str(memory_data))
+            json.dump(memory_data,file,indent=4)
+        
+
+    def history_manager(self):
+        if len(self.history)>MAX_HISTORY:
+            self.history = self.history[2:]
+        with open("history.txt","w") as file:
+            json.dump(self.history,file, indent = 4)
+
+
+    def add_history(self,prompt,response):
+        self.history.append(
+            {
+                "role":"user",
+                "parts":[{"text":prompt}]
+            }
+        )
+
+        self.history.append({
+            "role":"model",
+            "parts":[{"text":response}]
+        })
+        self.history_manager()
+
+    def clear_history(self):
+        self.history.clear()
+        print("The history is cleared")
+
+    def generate_response(self,prompt):
+        self.memory_classifier(prompt)
+        with open("knowledgebase.txt", "r", encoding="utf-8") as f:
+            knowledge = f.read()
+
+        with open("history.txt", "r", encoding="utf-8") as f:
+            full_history = f.read()
+
+        
+
+        response = self.client.models.generate_content(
+            model = "gemini-3.1-flash-lite",
+            contents = f""" user question {prompt} 
+             Knowledge base: {knowledge} and 
+             History: {full_history} 
+            """
+        )
+        data =  response.text.strip()
+        print(data)
+        self.add_history(prompt,data)
+
 
 bot = chatbot()
 
-prompt = ["hi my name is sakshyam"]
+print("What do you want to perform")
+print("/generate")
+print("/clear")
+print("/exit")
 
-bot.memory_classifier(prompt)
+while True:
+    user_input = input("\nYou: ")
+    if user_input == "/exit":
+        print("Goodbye.")
+        break
+    elif user_input == "/clear":
+        bot.clear_history()
+    elif user_input == "/generate":
+        user_text = input("\nHi! Kanchha here, How can i help you:\n")
+        try:
+            bot.generate_response(user_text)
+        except Exception as e:
+            print(f"Generation Error: {e}"
+)
+    else:
+        print("Unknown command.")
