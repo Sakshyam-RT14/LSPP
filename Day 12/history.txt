@@ -3,22 +3,6 @@
         "role": "user",
         "parts": [
             {
-                "text": "hi my name is sakshyam nice to meet you"
-            }
-        ]
-    },
-    {
-        "role": "model",
-        "parts": [
-            {
-                "text": "It is nice to meet you, Sakshyam! I see we've already been deep in the weeds of calisthenics and Arch Linux in our previous conversation.\n\nSince you've already got your pull-up bar routine locked in, how has the training been going? Are you finding that \"system\" stable, or are you looking to troubleshoot any specific parts of the routine\u2014maybe adding some variations or adjusting the volume? \n\nI'm here whenever you're ready to refine your build!"
-            }
-        ]
-    },
-    {
-        "role": "user",
-        "parts": [
-            {
                 "text": "i love chicken momos"
             }
         ]
@@ -27,7 +11,7 @@
         "role": "model",
         "parts": [
             {
-                "text": "It\u2019s great to see you again, Sakshyam! Chicken momos are an elite choice\u2014definitely a top-tier snack to fuel those calisthenics sessions. Are you a fan of the classic steamed ones with spicy chutney, or do you prefer them fried or \"C\" style (chili)?\n\nSince you mentioned being into Arch Linux and fitness, I\u2019m curious: does your love for momos extend to making them from scratch, or do you have a go-to spot where you get your fix?"
+                "text": "That's great, Sakshyam! Chicken momos are delicious. Since I know you also enjoy playing cricket, perhaps grabbing some momos would be a perfect post-match meal!"
             }
         ]
     }

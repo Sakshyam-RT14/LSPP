@@ -71,11 +71,14 @@ Valid categories:
 - goals
 - other
 
-If the message should not be stored:
+If no memories should be stored:
 
-{{
-  "store": false
-}}
+[]
+
+Do not return explanations.
+Do not return markdown.
+Do not return code blocks.
+Do not return any text outside the JSON.
 
 User Message:
 {prompt}
@@ -84,11 +87,16 @@ User Message:
         )
         memory_data = json.loads(memory_classification.text.strip())
 
-        if memory_data["store"]:
-            self.save_memory(
-                memory_data["category"],
-                memory_data["content"]
-            )
+        if isinstance(memory_data, dict):
+                memory_data = [memory_data]
+
+        for memory in memory_data:
+
+                if memory.get("store"):
+                    self.save_memory(
+                        memory["category"],
+                        memory["content"]
+                    )
         
 
     def save_memory(self,category,context):
@@ -99,6 +107,7 @@ User Message:
         INSERT OR IGNORE INTO memories(category,content) VALUES(?,?)
         
         """,(category,context))
+
 
         conn.commit()
         conn.close()    
@@ -141,6 +150,18 @@ User Message:
     def clear_history(self):
         self.history.clear()
         print("The history is cleared")
+    
+    def clear_memory(self):
+        conn = sqlite3.connect("kanchha_memory.db")
+        cursor = conn.cursor()
+
+        cursor.execute("DELETE FROM memories")
+        cursor.execute("DELETE FROM sqlite_sequence WHERE name='memories'")
+
+        conn.commit()
+        conn.close()
+
+        print("Knowledge base cleared.")
 
     def generate_response(self,prompt):
         self.memory_classifier(prompt)
@@ -177,6 +198,7 @@ while True:
         break
     elif user_input == "/clear":
         bot.clear_history()
+        bot.clear_memory()
     elif user_input == "/generate":
         user_text = input("\nHi! Kanchha here, How can i help you:\n")
         try:
