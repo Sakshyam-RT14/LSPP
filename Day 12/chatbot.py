@@ -3,6 +3,9 @@ import os
 from google import genai
 import json
 import sqlite3
+from memory import setup_db
+
+setup_db()
 
 
 load_dotenv()
@@ -79,17 +82,17 @@ User Message:
  """
         
         )
-       memory_data = json.loads(memory_classification.text.strip())
+        memory_data = json.loads(memory_classification.text.strip())
 
-       if memory_data["store"]:
-        save_memory(
-            memory_data["category"],
-            memory_data["content"]
-        )
+        if memory_data["store"]:
+            self.save_memory(
+                memory_data["category"],
+                memory_data["content"]
+            )
         
 
-    def save_memory(category,context):
-        conn = sqlite.connect("kancha_memory.db")
+    def save_memory(self,category,context):
+        conn = sqlite3.connect("kanchha_memory.db")
         cursor = conn.cursor()
 
         cursor.execute("""
@@ -98,11 +101,21 @@ User Message:
         """,(category,context))
 
         conn.commit()
+        conn.close()    
+    
+    def get_memory(self,limit:20):     #establishing limit because as the knowledge base gets bigger it gets difficult and for normal questions you don't really need so much rettrieval
+        conn = sqlite3.connect("kanchha_memory.db")
+        cursor = conn.cursor()
+
+        cursor.execute("""
+            SELECT category , content FROM memories ORDER BY id DESC LIMIT ?
+        """,(20,))
+
+        memory = cursor.fetchall()
+
         conn.close()
-    
-    
-    
-    
+
+        return memory
     
     def history_manager(self):
         if len(self.history)>MAX_HISTORY:
@@ -131,8 +144,7 @@ User Message:
 
     def generate_response(self,prompt):
         self.memory_classifier(prompt)
-        with open("knowledgebase.txt", "r", encoding="utf-8") as f:
-            knowledge = f.read()
+        memory = self.get_memory(20)
 
         with open("history.txt", "r", encoding="utf-8") as f:
             full_history = f.read()
@@ -142,7 +154,7 @@ User Message:
         response = self.client.models.generate_content(
             model = "gemini-3.1-flash-lite",
             contents = f""" user question {prompt} 
-             Knowledge base: {knowledge} and 
+             Knowledge base: {memory} and 
              History: {full_history} 
             """
         )
