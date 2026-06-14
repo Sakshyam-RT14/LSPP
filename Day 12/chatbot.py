@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import os 
 from google import genai
 import json
+import sqlite3
 
 
 load_dotenv()
@@ -54,7 +55,7 @@ If the message contains useful information:
 {{
   "store": true,
   "category": "<category>",
-  "memory": "<memory_to_store>"
+  "content": "<memory_to_store>"
 }}
 
 Valid categories:
@@ -78,11 +79,31 @@ User Message:
  """
         
         )
-        memory_data = memory_classification.text.strip()
-        with open("knowledgebase.txt","a") as file:
-            json.dump(memory_data,file,indent=4)
+       memory_data = json.loads(memory_classification.text.strip())
+
+       if memory_data["store"]:
+        save_memory(
+            memory_data["category"],
+            memory_data["content"]
+        )
         
 
+    def save_memory(category,context):
+        conn = sqlite.connect("kancha_memory.db")
+        cursor = conn.cursor()
+
+        cursor.execute("""
+        INSERT OR IGNORE INTO memories(category,content) VALUES(?,?)
+        
+        """,(category,context))
+
+        conn.commit()
+        conn.close()
+    
+    
+    
+    
+    
     def history_manager(self):
         if len(self.history)>MAX_HISTORY:
             self.history = self.history[2:]
